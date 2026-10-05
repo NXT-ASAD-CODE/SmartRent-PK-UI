@@ -287,6 +287,47 @@ h1.rtitle{font-size:clamp(34px,5vw,52px)}
 /* keep headline readable */
 .hero-bg::after{content:"";position:absolute;inset:0;z-index:2;
   background:radial-gradient(ellipse 62% 78% at 27% 50%,var(--bg) 30%,transparent 100%)}
+  .brand,.rentbrand{overflow:visible}
+.brand svg,.rentbrand svg{transition:transform .6s cubic-bezier(.3,1.4,.4,1)}
+.brand-t{display:inline-block}
+.nav .wrap{transition:height .3s}
+.nav,.rentbar{transition:box-shadow .3s}
+.nav.scrolled .wrap{height:54px}
+.nav.scrolled{box-shadow:0 6px 24px rgba(0,0,0,.12)}
+.links a{position:relative;padding:6px 0}
+.links a::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--signal);transform:scaleX(0);transform-origin:left;transition:transform .3s}
+.links a:hover::after{transform:scaleX(1)}
+
+@media (prefers-reduced-motion:no-preference){
+  @keyframes drop{from{opacity:0;transform:translateY(-100%)}}
+  @keyframes pop{0%{transform:scale(0) rotate(-120deg);opacity:0}70%{transform:scale(1.25) rotate(10deg)}100%{transform:none;opacity:1}}
+  @keyframes glow{0%,100%{filter:none;transform:scale(1)}50%{filter:drop-shadow(0 0 7px var(--signal));transform:scale(1.18)}}
+  @keyframes shimmer{to{background-position:-250% 0}}
+  @keyframes reveal{from{clip-path:inset(0 100% 0 0);transform:translateX(-10px)}to{clip-path:inset(0 0 0 0)}}
+  @keyframes linkin{from{opacity:0;transform:translateY(-10px)}}
+
+  .nav,.rentbar{animation:drop .7s cubic-bezier(.2,.8,.2,1) backwards}
+
+  /* logo: four squares pop in one by one, then the amber one glows */
+  .brand svg rect,.rentbrand svg rect{transform-box:fill-box;transform-origin:center;animation:pop .6s cubic-bezier(.3,1.4,.4,1) backwards}
+  .brand svg rect:nth-child(2),.rentbrand svg rect:nth-child(2){animation-delay:.12s}
+  .brand svg rect:nth-child(3),.rentbrand svg rect:nth-child(3){animation-delay:.24s}
+  .brand svg rect:nth-child(4),.rentbrand svg rect:nth-child(4){animation:pop .6s .36s backwards,glow 2.6s 1.4s ease-in-out infinite}
+  .brand:hover svg,.rentbrand:hover svg{transform:rotate(90deg) scale(1.1)}
+
+  /* heading: types in from the left, then a light sweep runs across it */
+  .brand-t{
+    background:linear-gradient(100deg,var(--ink) 40%,var(--brand) 50%,var(--signal) 55%,var(--ink) 65%) 0 0/250% 100%;
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
+    animation:reveal .8s .45s cubic-bezier(.2,.8,.2,1) backwards,shimmer 5s 1.6s linear infinite}
+
+  /* menu links drop in one after another */
+  .links a{animation:linkin .5s backwards}
+  .links a:nth-child(1){animation-delay:.6s}.links a:nth-child(2){animation-delay:.7s}
+  .links a:nth-child(3){animation-delay:.8s}.links a:nth-child(4){animation-delay:.9s}
+  .nav .btn.small{animation:linkin .5s 1s backwards,ring 2.4s 2s infinite}
+}
+@keyframes ring{0%{box-shadow:0 0 0 0 rgba(217,154,0,.55)}70%,100%{box-shadow:0 0 0 14px rgba(217,154,0,0)}}
 </style>
 </head>
 <body>
@@ -809,6 +850,21 @@ if(!matchMedia("(prefers-reduced-motion:reduce)").matches){
     var c=Math.floor(x/(r.width/cols)), rw=Math.floor(y/(r.height/rows));
     pop(cells[rw*cols+c],1400);
   });
+})();
+(function(){
+  // wrap the brand text so it can be animated separately from the logo
+  document.querySelectorAll(".brand,.rentbrand").forEach(function(b){
+    Array.prototype.slice.call(b.childNodes).forEach(function(n){
+      if(n.nodeType===3 && n.textContent.trim()){
+        var s=document.createElement("span"); s.className="brand-t"; s.textContent=n.textContent.trim();
+        b.replaceChild(s,n);
+      }
+    });
+  });
+  // shrink the navbar and add a shadow once the page scrolls
+  var nav=document.querySelector(".nav");
+  function onScroll(){ if(nav) nav.classList.toggle("scrolled",window.scrollY>12); }
+  window.addEventListener("scroll",onScroll,{passive:true}); onScroll();
 })();
 </script>
 </body>
